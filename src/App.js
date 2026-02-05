@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import WeatherCard from './components/WeatherCard';
 import SearchBar from './components/SearchBar';
@@ -6,7 +6,7 @@ import Forecast from './components/Forecast';
 import ThemeToggle from './components/ThemeToggle';
 
 function App() {
-  // STATE MANAGEMENT
+  // State variables
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -14,16 +14,17 @@ function App() {
   const [theme, setTheme] = useState('light');
   const [unit, setUnit] = useState('metric');
   
-  //API KEY 
-  const API_KEY = '6b3cbcd7a6552311d1f9486be388d0e5'; 
+  // OpenWeatherMap API key
+  const API_KEY = '6b3cbcd7a6552311d1f9486be388d0e5';
   const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
-  const fetchWeatherData = async (city) => {
+  // Fetch weather data function
+  const fetchWeatherData = useCallback(async (city) => {
     setLoading(true);
     setError('');
     
     try {
-      // Fetch current weather
+      // 1. Get current weather
       const weatherResponse = await fetch(
         `${BASE_URL}/weather?q=${city}&units=${unit}&appid=${API_KEY}`
       );
@@ -35,14 +36,14 @@ function App() {
       const weather = await weatherResponse.json();
       setWeatherData(weather);
       
-      // Fetch 5-day forecast
+      // 2. Get 5-day forecast
       const forecastResponse = await fetch(
         `${BASE_URL}/forecast?q=${city}&units=${unit}&appid=${API_KEY}`
       );
       
       const forecast = await forecastResponse.json();
       
-      // Get one forecast per day at 12:00 PM
+      // Get one forecast per day at noon
       const dailyForecast = forecast.list.filter(item => 
         item.dt_txt.includes('12:00:00')
       ).slice(0, 5);
@@ -56,27 +57,31 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [unit, API_KEY]);
 
-  // Initial load
+  // Load initial data
   useEffect(() => {
     fetchWeatherData('New York');
-  }, [unit]);
+  }, [fetchWeatherData]);
 
+  // Handle search
   const handleSearch = (city) => {
     if (city.trim()) {
       fetchWeatherData(city);
     }
   };
 
+  // Toggle temperature units
   const toggleUnit = () => {
     setUnit(unit === 'metric' ? 'imperial' : 'metric');
   };
 
+  // Toggle theme
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  // Get weather icon
   const getWeatherIcon = (condition) => {
     const icons = {
       'Clear': 'fas fa-sun',
@@ -93,22 +98,29 @@ function App() {
   };
 
   return (
-    <div className={`app ${theme}-theme`}>
-      <div className="weather-container">
-        <header className="header">
-          <h1><i className="fas fa-cloud-sun"></i> React Weather App</h1>
+    <div className={`app ${theme}`}>
+      <div className="container">
+        {/* Header */}
+        <div className="header">
+          <h1>
+            <i className="fas fa-cloud-sun"></i>
+            React Weather App
+          </h1>
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-        </header>
+        </div>
 
+        {/* Search Bar */}
         <SearchBar onSearch={handleSearch} loading={loading} />
         
+        {/* Error Message */}
         {error && (
-          <div className="error-message">
+          <div className="error">
             <i className="fas fa-exclamation-triangle"></i>
             <p>{error}</p>
           </div>
         )}
 
+        {/* Loading Spinner */}
         {loading && (
           <div className="loading">
             <i className="fas fa-spinner fa-spin"></i>
@@ -116,8 +128,9 @@ function App() {
           </div>
         )}
 
+        {/* Weather Content */}
         {weatherData && !loading && (
-          <>
+          <div className="weather-content">
             <WeatherCard 
               weather={weatherData}
               unit={unit}
@@ -130,43 +143,55 @@ function App() {
               unit={unit}
               getWeatherIcon={getWeatherIcon}
             />
-          </>
+          </div>
         )}
 
+        {/* Quick Cities */}
+        <div className="quick-cities">
+          <p>
+            <i className="fas fa-lightbulb"></i>
+            Try these cities:
+          </p>
+          <div className="city-buttons">
+            {['London', 'Tokyo', 'Paris', 'Sydney', 'Dubai'].map(city => (
+              <button 
+                key={city}
+                onClick={() => handleSearch(city)}
+                className="city-btn"
+              >
+                {city}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* React Features Demo */}
         <div className="features">
-          <h3><i className="fas fa-star"></i> React Concepts Demonstrated</h3>
+          <h3>
+            <i className="fas fa-star"></i>
+            React Concepts Demonstrated
+          </h3>
           <div className="features-grid">
-            <div className="feature-card">
+            <div className="feature">
               <i className="fas fa-cube"></i>
               <h4>Components & Props</h4>
-              <p>5 reusable components with props</p>
+              <p>5 reusable components</p>
             </div>
-            <div className="feature-card">
+            <div className="feature">
               <i className="fas fa-database"></i>
               <h4>State Management</h4>
               <p>useState & useEffect hooks</p>
             </div>
-            <div className="feature-card">
+            <div className="feature">
               <i className="fas fa-cloud-download-alt"></i>
               <h4>API Integration</h4>
-              <p>OpenWeatherMap API with error handling</p>
+              <p>Real-time OpenWeatherMap API</p>
             </div>
-            <div className="feature-card">
+            <div className="feature">
               <i className="fas fa-exchange-alt"></i>
               <h4>Event Handling</h4>
-              <p>Search, toggle, and theme events</p>
+              <p>Search, toggle, theme events</p>
             </div>
-          </div>
-        </div>
-
-        <div className="quick-cities">
-          <p><i className="fas fa-lightbulb"></i> Try these cities:</p>
-          <div className="city-buttons">
-            <button onClick={() => handleSearch('London')}>London</button>
-            <button onClick={() => handleSearch('Tokyo')}>Tokyo</button>
-            <button onClick={() => handleSearch('Paris')}>Paris</button>
-            <button onClick={() => handleSearch('Sydney')}>Sydney</button>
-            <button onClick={() => handleSearch('Dubai')}>Dubai</button>
           </div>
         </div>
       </div>

@@ -5,8 +5,6 @@ const WeatherCard = ({ weather, unit, toggleUnit, getWeatherIcon }) => {
   
   const temperature = Math.round(main.temp);
   const feelsLike = Math.round(main.feels_like);
-  const highTemp = Math.round(main.temp_max);
-  const lowTemp = Math.round(main.temp_min);
   const condition = conditions[0].main;
   const description = conditions[0].description;
   const country = sys.country;
