@@ -5,11 +5,13 @@ const ThemeToggle = ({ theme, toggleTheme }) => {
     <button className="theme-toggle" onClick={toggleTheme}>
       {theme === 'light' ? (
         <>
-          <i className="fas fa-moon"></i> Dark Mode
+          <i className="fas fa-moon"></i>
+          Dark Mode
         </>
       ) : (
         <>
-          <i className="fas fa-sun"></i> Light Mode
+          <i className="fas fa-sun"></i>
+          Light Mode
         </>
       )}
     </button>

@@ -37,8 +37,8 @@ const SearchBar = ({ onSearch, loading }) => {
             </>
           ) : (
             <>
-              <i className="fas fa-cloud-sun"></i>
-              Get Weather
+              <i className="fas fa-search"></i>
+              Search
             </>
           )}
         </button>
